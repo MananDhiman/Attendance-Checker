@@ -18,5 +18,5 @@ interface SubjectDao {
 
   // todo remove if not join used,
   @Insert
-  fun addSubjects(subjectNames: ArrayList<Subject>)
+  fun addSubjects(subjectNames: List<Subject>)
 }
