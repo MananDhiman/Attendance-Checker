@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,8 +25,7 @@ import com.manandhiman.attendancechecker.ui.AttendanceHistoryScreen
 import com.manandhiman.attendancechecker.ui.MarkAttendanceScreen
 import com.manandhiman.attendancechecker.ui.SetupScreen
 import com.manandhiman.attendancechecker.ui.theme.AttendanceCheckerTheme
-import com.manandhiman.attendancechecker.viewmodel.AttendanceHistoryViewModel
-import com.manandhiman.attendancechecker.viewmodel.MarkAttendanceViewModel
+import com.manandhiman.attendancechecker.viewmodel.MainViewModel
 import com.manandhiman.attendancechecker.viewmodel.SetupViewModel
 
 class MainActivity : ComponentActivity() {
@@ -35,9 +33,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val markAttendanceViewModel = ViewModelProvider(this)[MarkAttendanceViewModel::class.java]
     val setupViewModel = ViewModelProvider(this)[SetupViewModel::class.java]
-    val attendanceHistoryViewModel = ViewModelProvider(this)[AttendanceHistoryViewModel::class.java]
 
     setContent {
       AttendanceCheckerTheme {
@@ -53,10 +49,11 @@ class MainActivity : ComponentActivity() {
               return@Surface
             }
 
+            val mainViewModel = ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
             TopNavigationBar(showHistoryScreen)
 
-            if(showHistoryScreen.value) AttendanceHistoryScreen(attendanceHistoryViewModel)
-            else MarkAttendanceScreen(markAttendanceViewModel)
+            if(showHistoryScreen.value) AttendanceHistoryScreen(mainViewModel)
+            else MarkAttendanceScreen(mainViewModel)
 
           }
         }

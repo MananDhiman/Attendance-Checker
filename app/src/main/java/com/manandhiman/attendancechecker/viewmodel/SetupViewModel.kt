@@ -1,10 +1,12 @@
 package com.manandhiman.attendancechecker.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.room.Room
+import com.manandhiman.attendancechecker.MainActivity
 import com.manandhiman.attendancechecker.data.AppDatabase
 import com.manandhiman.attendancechecker.model.Attendance
 import com.manandhiman.attendancechecker.model.Subject
@@ -12,7 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class SetupViewModel(application: Application) : AndroidViewModel(application) {
+class SetupViewModel(private val application: Application) : AndroidViewModel(application) {
 
   private val db = Room.databaseBuilder(
     getApplication(),
@@ -43,6 +45,9 @@ class SetupViewModel(application: Application) : AndroidViewModel(application) {
       val att = Attendance(i.name, "", "", 0, 0)
       attendanceDao.insert(att)
     }
+
+    application.startActivity(Intent(application, MainActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+
   }
 
 }

@@ -2,10 +2,8 @@ package com.manandhiman.attendancechecker.viewmodel
 
 import android.app.Application
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
 import com.manandhiman.attendancechecker.data.AppDatabase
 import com.manandhiman.attendancechecker.model.Attendance
@@ -15,7 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MarkAttendanceViewModel(application: Application): AndroidViewModel(application) {
+class MainViewModel(application: Application): AndroidViewModel(application) {
 
   private val sdf = SimpleDateFormat("dd/M/yyyy", Locale.getDefault())
   private val currentDate = sdf.format(Date())
@@ -25,10 +23,16 @@ class MarkAttendanceViewModel(application: Application): AndroidViewModel(applic
     AppDatabase::class.java, "attendance-record",
   ).allowMainThreadQueries().build()
 
-  private val subjectDao = db.subjectDao()
   private val attendanceDao = db.attendanceDao()
 
-  val latestAttendanceBySubject = mutableStateOf(attendanceDao.getLastBySubject())
+  val latestAttendanceBySubject: MutableState<List<Attendance>> = mutableStateOf(attendanceDao.getLastBySubject())
+
+  val historyAttendance: MutableState<List<Attendance>> = mutableStateOf(attendanceDao.getAll().filter { it.totalDays != 0 })
+
+  fun reloadFromDb() {
+    latestAttendanceBySubject.value = attendanceDao.getLastBySubject()
+    historyAttendance.value = attendanceDao.getAll().filter { it.totalDays != 0 }
+  }
 
   fun markPresent(subjectName: String) {
     val prevAtt = attendanceDao.getLastById(subjectName)
@@ -41,7 +45,7 @@ class MarkAttendanceViewModel(application: Application): AndroidViewModel(applic
       prevAtt.presentDays + 1
     )
     attendanceDao.insert(att)
-    latestAttendanceBySubject.value = attendanceDao.getLastBySubject()
+    reloadFromDb()
   }
 
   fun markAbsent(subjectName: String) {
@@ -55,7 +59,7 @@ class MarkAttendanceViewModel(application: Application): AndroidViewModel(applic
       prevAtt.presentDays
     )
     attendanceDao.insert(att)
-    latestAttendanceBySubject.value = attendanceDao.getLastBySubject()
+    reloadFromDb()
   }
 
   fun formattedCurrentAttendance(presentDays: Int, totalDays: Int): String {
@@ -65,5 +69,14 @@ class MarkAttendanceViewModel(application: Application): AndroidViewModel(applic
 
     val formattedPercentage =  df.format(percentage)
     return "$presentDays/$totalDays = $formattedPercentage%"
+  }
+
+  fun deleteFromDB(attendance: Attendance) {
+    attendanceDao.deleteAttendance(attendance)
+    reloadFromDb()
+  }
+
+  fun searchHistory(searchQuery: String) {
+    historyAttendance.value = attendanceDao.search(searchQuery).toList().filter { it.totalDays != 0 }
   }
 }
