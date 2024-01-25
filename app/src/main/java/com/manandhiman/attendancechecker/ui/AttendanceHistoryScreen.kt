@@ -1,6 +1,5 @@
 package com.manandhiman.attendancechecker.ui
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,10 +13,14 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.manandhiman.attendancechecker.model.Attendance
@@ -25,12 +28,25 @@ import com.manandhiman.attendancechecker.viewmodel.MainViewModel
 
 @Composable
 fun AttendanceHistoryScreen(viewModel: MainViewModel) {
+  AttendanceHistoryScreen(
+    viewModel::handleSearch,
+    viewModel.historyAttendance,
+    viewModel::formattedCurrentAttendance,
+    viewModel::deleteFromDB,
+    viewModel.inputSearchQuery
+  )
+}
+
+@Composable
+fun AttendanceHistoryScreen(
+  handleSearch: () -> Unit,
+  historyAttendance: List<Attendance>,
+  formattedCurrentAttendance: (Int, Int) -> String,
+  deleteFromDB: (Attendance) -> Unit,
+  inputSearchQuery: MutableState<String>
+) {
 
   Column {
-
-    val inputSearchQuery = remember {
-      mutableStateOf("")
-    }
 
     Row (
       Modifier
@@ -43,8 +59,7 @@ fun AttendanceHistoryScreen(viewModel: MainViewModel) {
         value = inputSearchQuery.value,
         onValueChange = {
           inputSearchQuery.value = it
-          if(it == "") viewModel.reloadFromDb()
-          else viewModel.searchHistory(it)
+          handleSearch()
         },
         label = { Text(text = "Search using Subject Name or Date") },
         modifier = Modifier.fillMaxWidth(1f)
@@ -52,11 +67,11 @@ fun AttendanceHistoryScreen(viewModel: MainViewModel) {
     }
 
     LazyColumn {
-      items(viewModel.historyAttendance.value.size) {
+      items(historyAttendance.size) {
         AttendanceHistoryItem(
-          viewModel.historyAttendance.value[it],
-          viewModel::formattedCurrentAttendance,
-          viewModel::deleteFromDB
+          historyAttendance[it],
+          formattedCurrentAttendance,
+          deleteFromDB
         )
         Divider()
       }
@@ -82,7 +97,11 @@ fun AttendanceHistoryItem(
       .padding(16.dp)
       .clickable { dropDownExpanded.value = !dropDownExpanded.value }
   ) {
-    Text(text = "${attendance.date} ${attendance.subjectName} ${attendance.status}", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+    Text(
+      text = "${attendance.date} ${attendance.subjectName} ${attendance.status}",
+      fontSize = 24.sp, fontWeight = FontWeight.Bold,
+      style = TextStyle(textDecoration = TextDecoration.Underline)
+    )
     Text(text = "${attendance.presentDays} / ${attendance.totalDays} = " +
         formattedCurrentAttendance(attendance.presentDays, attendance.totalDays))
 
@@ -97,4 +116,20 @@ fun AttendanceHistoryItem(
 
     }
   }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AttendanceHistoryScreenPreview() {
+
+  val list = listOf(Attendance(5,"Subject Name", "22/7/23", "Present",10,5),
+    Attendance(5,"Subject Name", "22/7/23", "Present",10,5))
+
+  AttendanceHistoryScreen(
+    handleSearch = { /*TODO*/ },
+    historyAttendance = list,
+    formattedCurrentAttendance = { _, _ -> "" },
+    deleteFromDB = { /*TODO*/ },
+    mutableStateOf("")
+  )
 }

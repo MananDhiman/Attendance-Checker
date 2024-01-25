@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.manandhiman.attendancechecker.model.Attendance
@@ -22,6 +23,21 @@ import com.manandhiman.attendancechecker.viewmodel.MainViewModel
 
 @Composable
 fun MarkAttendanceScreen(viewModel: MainViewModel) {
+  MarkAttendanceScreen(
+    latestAttendanceBySubject = viewModel.latestAttendanceBySubject,
+    formattedCurrentAttendance = viewModel::formattedCurrentAttendance,
+    markAbsent = viewModel::markAbsent,
+    markPresent = viewModel::markPresent
+  )
+}
+
+@Composable
+fun MarkAttendanceScreen(
+  latestAttendanceBySubject: List<Attendance>,
+  formattedCurrentAttendance: (Int, Int) -> String,
+  markAbsent: (String) -> Unit,
+  markPresent: (String) -> Unit,
+) {
 
   LazyColumn(
     Modifier
@@ -29,16 +45,23 @@ fun MarkAttendanceScreen(viewModel: MainViewModel) {
       .wrapContentHeight()
       .padding(8.dp)
   ) {
-    items(viewModel.latestAttendanceBySubject.value.size) {
-      MarkAttendanceItem(viewModel, viewModel.latestAttendanceBySubject.value[it])
+    items(latestAttendanceBySubject.size) {
+      MarkAttendanceItem(
+        latestAttendanceBySubject[it],
+        formattedCurrentAttendance,
+        markAbsent,
+        markPresent
+      )
     }
   }
 }
 
 @Composable
 fun MarkAttendanceItem(
-  viewModel: MainViewModel,
   attendance: Attendance,
+  formattedCurrentAttendance: (Int, Int) -> String,
+  markAbsent: (String) -> Unit,
+  markPresent: (String) -> Unit,
 ) {
   Column (
     Modifier
@@ -48,18 +71,18 @@ fun MarkAttendanceItem(
 
     Text(text = attendance.subjectName, fontSize = 24.sp, fontWeight = FontWeight.Bold)
     Text(text = "${attendance.presentDays} / ${attendance.totalDays} = " +
-        viewModel.formattedCurrentAttendance(attendance.presentDays, attendance.totalDays)
+        formattedCurrentAttendance(attendance.presentDays, attendance.totalDays)
     )
 
     Row (Modifier.fillMaxWidth(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
       Button(
-        onClick = { viewModel.markPresent(attendance.subjectName) },
+        onClick = { markPresent(attendance.subjectName) },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Green, contentColor = Color.Black)
       ) {
         Text(text = "Present")
       }
       Button(
-        onClick = { viewModel.markAbsent(attendance.subjectName) },
+        onClick = { markAbsent(attendance.subjectName) },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.Black)
       ) {
         Text(text = "Absent")
@@ -68,4 +91,19 @@ fun MarkAttendanceItem(
     }
     Divider()
   }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MarkAttendanceScreenPreview() {
+
+  val list = listOf(Attendance(5,"Subject Name", "22/7/23", "Present",10,5),
+    Attendance(5,"Subject Name", "22/7/23", "Present",10,5))
+
+  MarkAttendanceScreen(
+    latestAttendanceBySubject = list,
+    formattedCurrentAttendance = { _, _ -> ""},
+    markAbsent = {_ -> },
+    markPresent = {_ -> }
+  )
 }

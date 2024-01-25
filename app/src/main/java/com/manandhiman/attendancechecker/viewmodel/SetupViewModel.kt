@@ -10,9 +10,6 @@ import com.manandhiman.attendancechecker.MainActivity
 import com.manandhiman.attendancechecker.data.AppDatabase
 import com.manandhiman.attendancechecker.model.Attendance
 import com.manandhiman.attendancechecker.model.Subject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class SetupViewModel(private val application: Application) : AndroidViewModel(application) {
 
@@ -28,21 +25,17 @@ class SetupViewModel(private val application: Application) : AndroidViewModel(ap
 
   val subjectNames = mutableStateListOf<String>()
 
-  fun updateSubjectsCount(input: String) {
-    if(input != "" || input.contains('-') || input.contains('.')) return
-    subjectsCount.intValue = input.toInt()
-  }
-
   fun isSetup() = subjectDao.getAllSubjects().isNotEmpty()
 
   fun addSubjectsToDB() {
     val subjectList: MutableList<Subject> = mutableListOf()
 
-    for(i in 0..<subjectsCount.intValue) subjectList.add(Subject(subjectNames[i]))
+    for(i in 0..<subjectsCount.intValue) subjectList.add(Subject(subjectNames[i].trim()))
 
     subjectDao.addSubjects(subjectList)
     for (i in subjectList) {
-      val att = Attendance(i.name, "", "", 0, 0)
+      val att = Attendance(
+        subjectName = i.name, date = "", status = "", totalDays = 0, presentDays = 0)
       attendanceDao.insert(att)
     }
 

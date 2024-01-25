@@ -25,24 +25,28 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
   private val attendanceDao = db.attendanceDao()
 
-  val latestAttendanceBySubject: MutableState<List<Attendance>> = mutableStateOf(attendanceDao.getLastBySubject())
+  private val _latestAttendanceBySubject: MutableState<List<Attendance>> = mutableStateOf(attendanceDao.getLastBySubject())
+  val latestAttendanceBySubject get() = _latestAttendanceBySubject.value
 
-  val historyAttendance: MutableState<List<Attendance>> = mutableStateOf(attendanceDao.getAll().filter { it.totalDays != 0 })
+  private val _historyAttendance: MutableState<List<Attendance>> = mutableStateOf(attendanceDao.getAll().filter { it.totalDays != 0 })
+  val historyAttendance get() = _historyAttendance.value
 
-  fun reloadFromDb() {
-    latestAttendanceBySubject.value = attendanceDao.getLastBySubject()
-    historyAttendance.value = attendanceDao.getAll().filter { it.totalDays != 0 }
+  val inputSearchQuery = mutableStateOf("")
+
+  private fun reloadFromDb() {
+    _latestAttendanceBySubject.value = attendanceDao.getLastBySubject()
+    _historyAttendance.value = attendanceDao.getAll().filter { it.totalDays != 0 }
   }
 
   fun markPresent(subjectName: String) {
     val prevAtt = attendanceDao.getLastById(subjectName)
 
     val att = Attendance(
-      prevAtt.subjectName,
-      currentDate,
-      "Present",
-      prevAtt.totalDays + 1,
-      prevAtt.presentDays + 1
+      subjectName = prevAtt.subjectName,
+      date = currentDate,
+      status = "Present",
+      totalDays = prevAtt.totalDays + 1,
+      presentDays = prevAtt.presentDays + 1
     )
     attendanceDao.insert(att)
     reloadFromDb()
@@ -52,11 +56,11 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     val prevAtt = attendanceDao.getLastById(subjectName)
 
     val att = Attendance(
-      prevAtt.subjectName,
-      currentDate,
-      "Absent",
-      prevAtt.totalDays + 1,
-      prevAtt.presentDays
+      subjectName = prevAtt.subjectName,
+      date = currentDate,
+      status = "Present",
+      totalDays = prevAtt.totalDays + 1,
+      presentDays = prevAtt.presentDays
     )
     attendanceDao.insert(att)
     reloadFromDb()
@@ -73,10 +77,11 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
   fun deleteFromDB(attendance: Attendance) {
     attendanceDao.deleteAttendance(attendance)
-    reloadFromDb()
+    handleSearch()
   }
 
-  fun searchHistory(searchQuery: String) {
-    historyAttendance.value = attendanceDao.search(searchQuery).toList().filter { it.totalDays != 0 }
+  fun handleSearch() {
+    if(inputSearchQuery.value.isNotBlank()) _historyAttendance.value = attendanceDao.search(inputSearchQuery.value).toList().filter { it.totalDays != 0 }
+    else reloadFromDb()
   }
 }

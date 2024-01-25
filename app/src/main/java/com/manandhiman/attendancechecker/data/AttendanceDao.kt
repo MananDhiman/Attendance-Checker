@@ -24,6 +24,6 @@ interface AttendanceDao {
   @Delete
   fun deleteAttendance(attendance: Attendance)
 
-  @Query("SELECT * FROM attendance WHERE subject_name LIKE ('%'||:searchQuery||'%') OR date LIKE('%'||:searchQuery||'%');")
+  @Query("SELECT * FROM attendance WHERE subject_name LIKE ('%'||:searchQuery||'%') OR date LIKE('%'||:searchQuery||'%') ORDER BY id DESC;")
   fun search(searchQuery: String): List<Attendance>
 }
