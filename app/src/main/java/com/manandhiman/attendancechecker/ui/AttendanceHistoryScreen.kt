@@ -2,7 +2,6 @@ package com.manandhiman.attendancechecker.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -48,23 +47,15 @@ fun AttendanceHistoryScreen(
 
   Column {
 
-    Row (
-      Modifier
-        .fillMaxWidth(1f)
-        .wrapContentHeight()
-        .padding(16.dp)
-    ) {
-
-      OutlinedTextField (
-        value = inputSearchQuery.value,
-        onValueChange = {
-          inputSearchQuery.value = it
-          handleSearch()
-        },
-        label = { Text(text = "Search using Subject Name or Date") },
-        modifier = Modifier.fillMaxWidth(1f)
-      )
-    }
+    OutlinedTextField (
+      value = inputSearchQuery.value,
+      onValueChange = {
+        inputSearchQuery.value = it
+        handleSearch()
+      },
+      label = { Text(text = "Search using Subject Name or Date") },
+      modifier = Modifier.fillMaxWidth(1f).padding(16.dp)
+    )
 
     LazyColumn {
       items(historyAttendance.size) {

@@ -1,3 +1,4 @@
 <resources>
   <string name="app_name">Attendance Checker</string>
+  <string name="clear_all_data_text">Are you sure you want to clear all attendance records and subjects?\n\nThis will reset the app, and you will have to re-enter the subjects again</string>
 </resources>

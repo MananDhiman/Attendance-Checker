@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,13 +19,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import com.manandhiman.attendancechecker.ui.AttendanceHistoryScreen
 import com.manandhiman.attendancechecker.ui.MarkAttendanceScreen
+import com.manandhiman.attendancechecker.ui.Screens
 import com.manandhiman.attendancechecker.ui.SetupScreen
 import com.manandhiman.attendancechecker.ui.theme.AttendanceCheckerTheme
 import com.manandhiman.attendancechecker.viewmodel.MainViewModel
@@ -34,50 +38,71 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val setupViewModel = ViewModelProvider(this)[SetupViewModel::class.java]
-
     setContent {
       AttendanceCheckerTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+          
+          val setupViewModel = ViewModelProvider(this@MainActivity)[SetupViewModel::class.java]
+          val mainViewModel = ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
+          
+          UI(setupViewModel, mainViewModel)
 
-          val showHistoryScreen = rememberSaveable {
-            mutableStateOf(false)
-          }
-
-          Column {
-            if(!setupViewModel.isSetup()) {
-              SetupScreen(setupViewModel)
-              return@Surface
-            }
-
-            val mainViewModel = ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
-            TopNavigationBar(showHistoryScreen)
-
-            if(showHistoryScreen.value) AttendanceHistoryScreen(mainViewModel)
-            else MarkAttendanceScreen(mainViewModel)
-
-          }
         }
       }
     }
   }
 
   @Composable
-  fun TopNavigationBar(showHistoryScreen: MutableState<Boolean>) {
+  fun UI(setupViewModel: SetupViewModel, mainViewModel: MainViewModel) {
+    val currentScreen = rememberSaveable {
+      mutableStateOf(Screens.MarkAttendanceScreen)
+    }
+    Column {
+
+      if(!setupViewModel.isSetup()) {
+        SetupScreen(setupViewModel)
+        return
+      }
+
+      TopNavigationBar(currentScreen)
+
+      when(currentScreen.value) {
+        Screens.MarkAttendanceScreen -> MarkAttendanceScreen(viewModel = mainViewModel)
+        Screens.AttendanceHistoryScreen -> AttendanceHistoryScreen(viewModel = mainViewModel)
+        Screens.SetupScreen -> SetupScreen(viewModel = setupViewModel)
+      }
+    }
+  }
+
+  @Composable
+  fun TopNavigationBar(currentScreen: MutableState<Screens>) {
     Spacer(modifier = Modifier.height(8.dp))
     Column (Modifier.fillMaxWidth(1f)) {
       Row (
-        Modifier.fillMaxWidth(1f),
+        Modifier
+          .fillMaxWidth()
+          .padding(4.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
       ) {
-        Button(onClick = { showHistoryScreen.value = false }) {
-          Text(text = "New Attendance")
+        Button(onClick = { currentScreen.value = Screens.MarkAttendanceScreen }, modifier = Modifier.weight(1f)) {
+          Text(text = "New Attendance", maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
-        Button(onClick = { showHistoryScreen.value = true }) {
-          Text(text = "Attendance History")
+        Spacer(modifier = Modifier.width(4.dp))
+        Button(onClick = { currentScreen.value = Screens.AttendanceHistoryScreen }, modifier = Modifier.weight(1f)) {
+          Text(text = "History Attendance", maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        Button(onClick = { currentScreen.value = Screens.SetupScreen }, modifier = Modifier.weight(1f)) {
+          Text(text = "Setup Attendance", maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
       }
     }
+  }
+
+  @Preview(showBackground = true)
+  @Composable
+  fun TopNavigationBarPreview() {
+    TopNavigationBar(currentScreen = mutableStateOf(Screens.MarkAttendanceScreen))
   }
 }
 

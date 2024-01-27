@@ -67,6 +67,7 @@ fun MarkAttendanceItem(
     Modifier
       .fillMaxWidth(1f)
       .wrapContentHeight()
+      .padding(16.dp)
   ) {
 
     Text(text = attendance.subjectName, fontSize = 24.sp, fontWeight = FontWeight.Bold)

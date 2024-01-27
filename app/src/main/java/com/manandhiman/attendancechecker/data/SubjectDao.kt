@@ -19,4 +19,7 @@ interface SubjectDao {
   // todo remove if not join used,
   @Insert
   fun addSubjects(subjectNames: List<Subject>)
+
+  @Query("DELETE FROM subject")
+  fun deleteAll()
 }

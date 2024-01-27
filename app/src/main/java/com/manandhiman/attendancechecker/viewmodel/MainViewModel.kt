@@ -58,7 +58,7 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     val att = Attendance(
       subjectName = prevAtt.subjectName,
       date = currentDate,
-      status = "Present",
+      status = "Absent",
       totalDays = prevAtt.totalDays + 1,
       presentDays = prevAtt.presentDays
     )
