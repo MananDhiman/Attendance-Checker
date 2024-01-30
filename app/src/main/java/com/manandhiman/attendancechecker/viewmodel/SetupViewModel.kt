@@ -23,9 +23,11 @@ class SetupViewModel(private val application: Application) : AndroidViewModel(ap
 
   var confirmedNumberSubjects = mutableIntStateOf(3)
 
-  val subjectNames = mutableStateListOf<String>()
+  val subjectList: List<Subject> = subjectDao.getAllSubjects()
 
-  fun isSetup() = subjectDao.getAllSubjects().isNotEmpty()
+  fun isSetup() = subjectList.isNotEmpty()
+
+  val subjectNames = mutableStateListOf<String>()
 
   fun addSubjectsToDB() {
     val subjectList: MutableList<Subject> = mutableListOf()
@@ -46,7 +48,7 @@ class SetupViewModel(private val application: Application) : AndroidViewModel(ap
     application.startActivity(Intent(application, MainActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
   }
 
-  fun clearAllData() {
+  fun clearAllDataFromDB() {
     subjectDao.deleteAll()
     attendanceDao.deleteAll()
     restartApp()

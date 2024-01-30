@@ -30,7 +30,9 @@ import androidx.compose.material3.ButtonDefaults
 
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 import androidx.compose.ui.graphics.Color
@@ -48,7 +50,7 @@ fun SetupScreen(viewModel: SetupViewModel) {
     viewModel.confirmedNumberSubjects,
     viewModel.subjectNames,
     viewModel::addSubjectsToDB,
-    viewModel::clearAllData
+    viewModel::clearAllDataFromDB
   )
 }
 
@@ -58,16 +60,16 @@ fun SetupScreen(
   confirmedNumberSubjects: MutableIntState,
   subjectNames: SnapshotStateList<String>,
   addSubjectsToDB: () -> Unit,
-  clearAllData: () -> Unit
+  clearAllDataFromDB: () -> Unit
 ) {
 
-    if(isSetup) ClearAllDataUI(clearAllData)
-    else SubjectsNumberAndNameSection(confirmedNumberSubjects,subjectNames, addSubjectsToDB)
+    if(isSetup) ClearAllDataUI(clearAllDataFromDB)
+    else SubjectsNumberAndNameUI(confirmedNumberSubjects,subjectNames, addSubjectsToDB)
 
 }
 
 @Composable
-fun SubjectsNumberAndNameSection(
+fun SubjectsNumberAndNameUI(
   confirmedNumberSubjects: MutableIntState,
   subjectNames: SnapshotStateList<String>,
   addSubjectsToDB: () -> Unit
@@ -84,13 +86,13 @@ fun SubjectsNumberAndNameSection(
     verticalAlignment = Alignment.CenterVertically
   ) {
 
-    val numberOfSubjects = remember {
+    var numberOfSubjects by remember {
       mutableStateOf("3")
     }
-
+    
     OutlinedTextField (
-      value = numberOfSubjects.value,
-      onValueChange = { numberOfSubjects.value = it },
+      value = numberOfSubjects,
+      onValueChange = { if(it.contains("^[0-9]+$")) numberOfSubjects = it },
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
       label = { Text(text = "Enter Number of Subjects") },
       modifier = Modifier.fillMaxWidth(0.75f),
@@ -100,13 +102,14 @@ fun SubjectsNumberAndNameSection(
     Spacer(modifier = Modifier.width(8.dp))
 
     Button (
-      onClick = { confirmedNumberSubjects.intValue = numberOfSubjects.value.toInt() },
+      onClick = { confirmedNumberSubjects.intValue = numberOfSubjects.toInt() },
       modifier = Modifier.fillMaxWidth(1f)
     ) {
       Text(text = "Confirm", maxLines = 1)
     }
   }
 
+  Text(text = "S")
   Spacer(modifier = Modifier.height(16.dp))
 
   Column (
@@ -124,13 +127,15 @@ fun SubjectsNumberAndNameSection(
       items(confirmedNumberSubjects.intValue) { ind ->
         subjectNames.add("")
 
+//        if(it.contains("/^[\w\-\\s]+\$/"))
         OutlinedTextField(
           modifier = Modifier.fillMaxSize(1f),
           value = subjectNames[ind],
-          onValueChange = { subjectNames[ind] = it },
+          onValueChange = {  subjectNames[ind] = it },
           placeholder = { Text("Subject ${ind+1} Name") },
           maxLines = 1
         )
+        
         Spacer(modifier = Modifier.height(4.dp))
 
 //        Row (
@@ -147,12 +152,14 @@ fun SubjectsNumberAndNameSection(
         Spacer(modifier = Modifier.height(8.dp))
 
       }
-    }
-    Button(
-      onClick = { if(confirmedNumberSubjects.intValue != 0) addSubjectsToDB() },
-    Modifier.align(Alignment.CenterHorizontally)
-    ) {
-      Text(text = "Save Subjects")
+      item {
+        Button(
+          onClick = { if(confirmedNumberSubjects.intValue != 0) addSubjectsToDB() },
+          Modifier.align(Alignment.CenterHorizontally)
+        ) {
+          Text(text = "Save Subjects")
+        }   
+      }
     }
 
   }
@@ -160,7 +167,7 @@ fun SubjectsNumberAndNameSection(
 }
 
 @Composable
-fun ClearAllDataUI(clearAllData: () -> Unit) {
+fun ClearAllDataUI(clearAllDataFromDB: () -> Unit) {
 
   val alertDialogVisible = remember {
     mutableStateOf(false)
@@ -182,11 +189,11 @@ fun ClearAllDataUI(clearAllData: () -> Unit) {
     }
   }
 
-  if(alertDialogVisible.value) ClearDataAlertDialog(alertDialogVisible, clearAllData)
+  if(alertDialogVisible.value) ClearAllDataAlertDialog(alertDialogVisible, clearAllDataFromDB)
 }
 
 @Composable
-fun ClearDataAlertDialog(alertDialogVisible: MutableState<Boolean>, clearAllData: () -> Unit) {
+fun ClearAllDataAlertDialog(alertDialogVisible: MutableState<Boolean>, clearAllDataFromDB: () -> Unit) {
   AlertDialog(
     onDismissRequest = { alertDialogVisible.value = false },
     title = { Text(text = "Reset App Data?") },
@@ -195,7 +202,7 @@ fun ClearDataAlertDialog(alertDialogVisible: MutableState<Boolean>, clearAllData
     confirmButton = {
       Button(
         onClick = {
-          clearAllData()
+          clearAllDataFromDB()
           alertDialogVisible.value = false
         },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.Black)
@@ -214,8 +221,8 @@ fun ClearDataAlertDialog(alertDialogVisible: MutableState<Boolean>, clearAllData
 @Composable
 fun SetupScreenPreview() {
   Column {
-    SetupScreen(true, confirmedNumberSubjects = mutableIntStateOf(3), subjectNames = SnapshotStateList(), addSubjectsToDB = {}, clearAllData = {})
-    SetupScreen(false, confirmedNumberSubjects = mutableIntStateOf(3), subjectNames = SnapshotStateList(), addSubjectsToDB = {}, clearAllData = {})
+    SetupScreen(true, confirmedNumberSubjects = mutableIntStateOf(3), subjectNames = SnapshotStateList(), addSubjectsToDB = {}, clearAllDataFromDB = {})
+    SetupScreen(false, confirmedNumberSubjects = mutableIntStateOf(3), subjectNames = SnapshotStateList(), addSubjectsToDB = {}, clearAllDataFromDB = {})
   }
 
 

@@ -13,8 +13,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -77,7 +79,7 @@ fun AttendanceHistoryItem(
   deleteAttendance: (Attendance) -> Unit
 ) {
 
-  val dropDownExpanded = remember {
+  var dropDownExpanded by remember {
     mutableStateOf(false)
   }
 
@@ -86,7 +88,7 @@ fun AttendanceHistoryItem(
       .fillMaxWidth(1f)
       .wrapContentHeight()
       .padding(16.dp)
-      .clickable { dropDownExpanded.value = !dropDownExpanded.value }
+      .clickable { dropDownExpanded = !dropDownExpanded }
   ) {
     Text(
       text = "${attendance.date} ${attendance.subjectName} ${attendance.status}",
@@ -97,8 +99,8 @@ fun AttendanceHistoryItem(
         formattedCurrentAttendance(attendance.presentDays, attendance.totalDays))
 
     DropdownMenu(
-      expanded = dropDownExpanded.value,
-      onDismissRequest = { dropDownExpanded.value = false }
+      expanded = dropDownExpanded,
+      onDismissRequest = { dropDownExpanded = false }
     ) {
       DropdownMenuItem(
         text = {  Text("Delete") },
