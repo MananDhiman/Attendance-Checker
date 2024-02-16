@@ -109,7 +109,7 @@ fun SubjectsNumberAndNameUI(
     }
   }
 
-  Text(text = "S")
+
   Spacer(modifier = Modifier.height(16.dp))
 
   Column (

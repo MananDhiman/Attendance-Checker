@@ -85,15 +85,15 @@ class MainActivity : ComponentActivity() {
         horizontalArrangement = Arrangement.SpaceEvenly
       ) {
         Button(onClick = { currentScreen.value = Screens.MarkAttendanceScreen }, modifier = Modifier.weight(1f)) {
-          Text(text = "New Attendance", maxLines = 2, overflow = TextOverflow.Ellipsis)
+          Text(text = "Mark New", maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Spacer(modifier = Modifier.width(4.dp))
         Button(onClick = { currentScreen.value = Screens.AttendanceHistoryScreen }, modifier = Modifier.weight(1f)) {
-          Text(text = "History Attendance", maxLines = 2, overflow = TextOverflow.Ellipsis)
+          Text(text = "History", maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Spacer(modifier = Modifier.width(4.dp))
         Button(onClick = { currentScreen.value = Screens.SetupScreen }, modifier = Modifier.weight(1f)) {
-          Text(text = "Setup Attendance", maxLines = 2, overflow = TextOverflow.Ellipsis)
+          Text(text = "Setup", maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
       }
     }
